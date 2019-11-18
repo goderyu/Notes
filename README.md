@@ -14,19 +14,8 @@
 
 笔记目前存在的分类（标签）如下：
 
-```mermaid
-graph LR
-
-root(Notes Category)
-ue(UE4)
-qt(QT5)
-git(GIT)
-
-
-
-	root---ue
-	root---qt
-	root---git
-
-```
-
+> Notes Category
+>
+> > UE4
+> >
+> > QT5
