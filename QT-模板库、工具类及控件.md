@@ -1,3 +1,5 @@
+[TOC]
+
 # QVariant类
 
 类似于C++中的`union`数据类型。
@@ -45,4 +47,50 @@ QVariant::type枚举类型变量
 | \b   | 单词边界                 | (?!E) | 表示表达式后不跟随E才匹配 |
 
 `\s`在表达式中表示一个空白字符
+
+# 模型视图
+
+视图与模型绑定时，模型必须使用`new`创建，否则视图不能随着模型的改变而改变。
+
+# QString中浮点数设置格式问题
+
+```c++
+QString QString::arg(double a, int fieldWidth = 0, char format = 'g', int precision = -1, QChar fillChar = QLatin1Char(' ')) const
+```
+
+```c++
+[static] QString QString::number(double n, char format = 'g', int precision = 6)
+```
+
+以上两个方法是QString中用到double时最常用的方法。其中的precision是精确度，和format有关。如果format设置为'e','E','f'，则precision指示小数点后的位数；如果format设置为'g','G'，precision指示整数部分与小数部分位数和。
+
+> 官方文档中的解释如下：
+> Argument Formats
+> In member functions where an argument *format* can be specified (e.g., arg(), number(), the argument *format* can be one of the following:
+> 
+> | Format | Meaning                                          |
+| ------ | ------------------------------------------------ |
+| e      | format as [-]9.9e[+\|-]999                       |
+| E      | format as [-]9.9E[+\|-]999                       |
+| f      | format as [-]9.9                                 |
+| g      | use e or f format, whichever is the most concise |
+| G      | use E or f format, whichever is the most concise |
+> A *precision* is also specified with the argument *format*. For the 'e', 'E', and 'f' formats, the *precision* represents the number of digits *after* the decimal point. For the 'g' and 'G' formats, the *precision* represents the maximum number of significant digits (trailing zeroes are omitted). 
+
+# 综合小例子
+
+使用`QLineEdit`控件，为控件设置了正则表达式，只能按照限制字元进行输入。用到了`QLineEdit::setValidator(QValidator* v)`，对输入框的输入判断使用了`QLineEdit::hasAcceptableInput()`。
+
+```c++
+Dialog::Dialog(QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::Dialog) {
+    ui->setupUi(this);
+    QRegExp regExp("[A-Za-z][1-9][0-9]{0,2}");
+    ui->lineEdit->setValidator(new QRegExpValidator(regExp, this));
+    connect(ui->lineEdit, &QLineEdit::textChanged, [=]() {
+        ui->okButton->setEnabled(ui->lineEdit->hasAcceptableInput());
+    });
+}
+```
 
