@@ -34,3 +34,75 @@
 ## 虚基类构造规则
 
 > 如果类有间接虚基类，则除非只需使用该虚基类的默认构造函数，否则必须显式地调用该虚基类的某个构造函数。
+
+## C++建议
+
+> 声明一个`pure virtual`函数的目的是为了让继承类只继承函数接口。
+> 声明非纯虚函数的目的是让继承类继承该函数的接口和缺省实现。
+> 声明非虚函数的目的是为了令继承类继承函数的接口及一份强制性实现。
+
+我们可以轻易做到“提供缺省实现给继承类，但除非它们明确要求否则免谈”。此伎俩在于切断“virtual函数接口”和其“缺省实现”之间的连接。
+
+```c++
+class Airplane {
+public:
+    virtual void fly(const Airport& destination) = 0;
+protected:
+    void defaultFly(const Airport& destination);
+};
+void Airplane::defaultFly(const Airport& destination) {
+    // default action
+}
+
+class ModelA : public Airplane {
+public:
+    virtual void fly(const Airport& destination) { Airplane::fly(destination); }
+};
+
+class ModelB : public Airplane {
+public:
+    // 此时生成ModelB对象，调用fly接口，将不会出现问题，
+    // 因为其没有采用基类提供的缺省实现
+    virtual void fly(const Airport& destination) {  }
+};
+```
+
+## 继承与面向对象设计
+
+> 绝不重新定义继承而来的non-virtual函数。
+
+# 大规模C++程序设计
+
+> Use-In-The-Interface
+> 
+> 如果在声明一个函数时提到某个类型，那么就是在该函数的接口中使用了该类型。
+> 
+> 如果在一个类的（公共）成员函数的接口中使用了某种类型，那么就是在这个类的（公共）接口中使用了该类型。
+
+> Use-In-The-Implementation
+> 
+> 如果在某函数的定义中提到了某类型，那么在这个函数的实现中就使用了该类型。
+> 
+> 如果一个类型
+> 
+> 1. 被用在某个类的一个成员函数中
+> 2. 在某个类的一个数据成员的声明中被提到
+> 3. 是某个类的一个私有基类
+> 
+> 那么这个类的实现中就使用了这个类型。
+
+<center>
+
+|名称|含义|
+|---|---|
+|Uses|该类有一个成员函数命名了该类型|
+|HasA|该类嵌入了该类型的一个实例|
+|HoldsA|该类把一个指针（或引用）嵌入了该类型|
+|WasA|该类私有继承于该类型|
+
+</center>
+
+## 继承与分层
+
+> 如果某个类在它的实现中实质地使用了某个类型，则该类分层于该类型之上。
+
