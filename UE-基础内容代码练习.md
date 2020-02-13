@@ -207,3 +207,68 @@ public:
 		}
 	);
 ```
+
+# FString
+
+新建C++类，基类为Actor，命名为`MyString`。
+在`MyString.h`中声明如下：
+```c++
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString MyString;
+```
+
+在`MyString.cpp`的构造函数中写了下列代码：
+
+```c++
+	//创建FString
+	MyString = FString(TEXT("This is my test FString"));
+
+	//转换
+	//因为FName不区分大小写，所以转换存在损耗
+	auto MyName = FName(*MyString);
+	auto MyText = FText::FromString(MyString);
+
+	auto Str1 = MyName.ToString();
+	auto Str2 = MyText.ToString();
+
+	auto FloatStr = FString::SanitizeFloat(3.3f);
+	auto IntStr = FString::FromInt(30);
+	auto BoolStr = true ? FString(TEXT("true")) : FString(TEXT("false"));
+	//字符串格式为'X= Y= Z='
+	auto VectorStr = FVector(100).ToString();
+	//格式为'P= Y= R='
+	auto RotatorStr = FRotator(30).ToString();
+	
+	// auto TempObj = CreateDefaultSubobject<UStaticMesh>(TEXT("Mesh Name"));
+	// auto ObjStr = TempObj ? TempObj->GetName() : FString(TEXT("None"));
+
+	//FString转数值
+	auto bBoolFromStr = BoolStr.ToBool();
+	auto IntFromStr = FCString::Atoi(*IntStr);
+	auto FloatFromStr = FCString::Atof(*FloatStr);
+
+	//对比
+	auto Str3 = FString(TEXT("good"));
+	auto Str4 = FString(TEXT("GOOD"));
+	auto bEquals1 = (Str3 == Str4);
+	auto bEquals2 = (Str3.Equals(Str4, ESearchCase::CaseSensitive));
+	auto bEquals3 = (Str3.Equals(Str4, ESearchCase::IgnoreCase));
+
+	//搜索
+	//FromEnd只是从字符串结尾向前找，并不是字符串每一个字符都颠倒
+	//因此下列的两个搜索，bEquals4为true，bEquals5为false
+	auto bEquals4 = Str3.Contains(TEXT("go"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+	auto bEquals5 = Str3.Contains(TEXT("og"), ESearchCase::CaseSensitive, ESearchDir::FromEnd);
+	//最后一个参数为从哪个索引开始查找（包含该索引处的字符）
+	//查找到返回该子串在整个字符串中的第一个索引值
+	//查不到返回-1
+	auto FindIndex1 = Str4.Find(TEXT("od"), ESearchCase::IgnoreCase, ESearchDir::FromStart, 3);
+	auto FindIndex2 = Str4.Find(TEXT("od"), ESearchCase::IgnoreCase, ESearchDir::FromStart, 2);
+	//使用 %s 参数包含 FStrings 时，必须使用 * 运算符返回 %s 参数所需的 TCHAR*。
+	auto MakeString = FString::Printf(TEXT("%02d %.3f %s"), 30, 35.44444f, TEXT("good"));
+
+	//TCHAR_TO_ANSI - 将引擎字符串（TCHAR*）转换为 ANSI 字符串。
+	//ANSI_TO_TCHAR - 将 ANSI 字符串转换为引擎字符串（TCHAR*）。
+	auto Str5 = FString(ANSI_TO_TCHAR("132"));
+```
