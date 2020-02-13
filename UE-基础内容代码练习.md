@@ -1,5 +1,16 @@
 # TMap
 
+新建C++类，基类为Actor，命名为`MyMap`。
+在`MyMap.h`中声明如下：
+```c++
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<int32, FString> MyMap;
+```
+
+在`MyMap.cpp`的构造函数[^ footnote]中写了下列代码：
+[^ footnote]: 之所以写在构造函数中，是因为我的目的主要是熟悉这些数据结构的C++用法，我使用的是VSCode来编码调试。使用的UE版本为4.24，启动速度比4.18提升了很多。在调试时会发现UE的加载界面一旦到达73%，我在构造函数中下的断点就会触发，我便可以快速的验证代码功能逻辑。无需完全进入UE4Editor。
+
 ```c++
 	MyMap.Add(1, "Good1");
 	MyMap.Add(2, "Good2");
@@ -103,4 +114,95 @@ TMap 可以进行排序。排序后，迭代映射会以排序的顺序显示元
     //  { Key:3, Value:"Orange" }
     // ]
 
+```
+
+# TArray
+
+新建C++类，基类为Actor，命名为`MyArray`。
+在`MyArray.h`中声明如下：
+```c++
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<int32> MyArray;
+```
+
+在`MyArray.cpp`的构造函数中写了下列代码：
+
+```c++
+	//初始化3个元素，值均为5，注意参数顺序含义
+	MyArray.Init(5, 3);
+	//以下三种均是从尾部增加元素
+	MyArray.Add(1);
+	MyArray.Push(2);
+	MyArray.Emplace(3);
+	//追加
+	TArray<int32> TempArr;
+	TempArr.Init(0, 3);
+	//MyArray.Append(TempArr);
+	//唯一添加，没有的元素值才能添加成功到尾部
+	MyArray.AddUnique(5);
+	MyArray.AddUnique(6);
+	//按索引插入元素，在索引0处插入元素7，注意顺序
+	MyArray.Insert(7, 0);
+	//获得大小/元素个数
+	auto ArrSize = MyArray.Num();
+	//扩增或缩减长度，从尾部
+	MyArray.SetNum(20);
+	MyArray.SetNum(ArrSize);
+	
+	for(auto& Item: MyArray)
+	{
+		auto Number = Item;
+	}
+	for(auto Index = 0; Index != MyArray.Num(); ++Index)
+	{
+		auto Number = MyArray[Index];
+	}
+	//从头部查找大于3的首个元素，返回值是指针
+	//不要用得到的指针做指针偏移访问元素的操作
+	//这里返回的指针并不是满足查找条件的所有元素的数组
+	auto FindNumber = MyArray.FindByPredicate(
+		[](int32 It){
+		return It > 3;
+	});
+	//从尾部查找 MyArray.FindLastByPredicate
+
+	//排序
+	MyArray.Sort();
+
+	MyArray.Sort([](const int A, const int B) {
+		return A > B;
+	});
+	//不明所以...本来意思是让奇数排前偶数排后
+	//知道为什么了...我取余符号用了&而不是%，这都能犯糊涂..
+	MyArray.Sort([](const int A, const int B) {
+		return (A % 2) > (B % 2);
+	});
+	//获得指向首地址的指针
+	auto IntPtr = MyArray.GetData();
+	for(auto Index = 0; MyArray.IsValidIndex(Index); ++Index)
+	{
+		auto I = IntPtr[Index];
+	}
+	//int32就是4个字节32位，因此ElementSize为4
+	auto ElementSize = MyArray.GetTypeSize();
+	//Last可以额外给索引值，从尾部的偏移量，Top只有无参一种
+	auto ElemEnd = MyArray.Last();
+	auto ElemEnd0 = MyArray.Last(0);
+	auto ElemEnd1 = MyArray.Last(1);
+	auto ElemTop = MyArray.Top();//Top是尾部第一个元素
+	//但凡有一个元素满足条件就返回真
+	auto bContains = MyArray.ContainsByPredicate(
+		[](int32 Item) {
+			return Item < 0;
+		}
+	);
+
+	//写的函数符，意思是能被2整除返回真，
+	//这里得到的Filter是偶数的数组
+	auto Filter = MyArray.FilterByPredicate(
+		[](int32 Item) {
+			return ((Item % 2) == 0);
+		}
+	);
 ```
